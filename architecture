@@ -1,0 +1,40 @@
+digraph Persona_Architecture {
+	bgcolor=white fontname=Helvetica rankdir=TB
+	Frontend [label="🎨 Frontend (HTML/CSS/JS)
+• ADHD-Dopamine UI
+• Chat, Tasks, XP, Email
+• Sidebar History" color="#00BFFF" fillcolor="#E0F7FF" shape=box style="filled,rounded"]
+	Backend [label="⚙️ Flask Backend (Python)
+• REST APIs
+• /api/ask, /api/tasks, /api/xp
+• /api/draft-email, /api/history" color="#FF7F50" fillcolor="#FFF1E6" shape=box3d style="filled,rounded"]
+	OpenRouter [label="🧠 OpenRouter API
+• LLM Gateway
+• Llama-3 / Mistral / Gemma models" color="#6A5ACD" fillcolor="#E6E0FF" shape=component style="filled,rounded"]
+	Memory [label="💾 In-Memory Store
+• XP
+• Last Chats
+• Last Tasks
+• History (Chats/Tasks/Emails)" color="#32CD32" fillcolor="#E9FFE9" shape=cylinder style=filled]
+	Frontend -> Backend [label="User Actions (Fetch API)
+Chat / Task / XP / Email requests" color="#333333" fontsize=10]
+	Backend -> OpenRouter [label="LLM Prompt Calls
+(JSON via HTTPS)" color="#555555" fontsize=10]
+	Backend -> Memory [label="Update XP + Save History" color="#228B22" fontsize=10]
+	Memory -> Backend [label="Fetch Data / Stats" color="#228B22" fontsize=10]
+	Backend -> Frontend [label="AI Responses
++ XP / History Updates" color="#333333" fontsize=10]
+	subgraph cluster_user {
+		color=lightblue label="👤 User Interface Layer"
+		Frontend
+	}
+	subgraph cluster_backend {
+		color=coral label="🧩 Application Layer"
+		Backend
+		Memory
+	}
+	subgraph cluster_api {
+		color=plum label="☁️ AI Model Layer"
+		OpenRouter
+	}
+}

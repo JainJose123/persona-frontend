@@ -1,0 +1,43 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>POS Demo • XP & Avatars</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="setActive('nav-xp'); renderXPBars();">
+  <nav>
+    <a id="nav-home" href="index.html">🏠 Home</a>
+    <a id="nav-tasks" href="tasks.html">🗓️ Tasks</a>
+    <a id="nav-xp" href="xp.html">⭐ XP</a>
+    <a id="nav-email" href="email.html">✉️ Email</a>
+  </nav>
+  <div class="container">
+    <div class="card">
+      <h2>Avatar Progress</h2>
+      <div class="kpis" style="margin-top:10px">
+        <div class="kpi">
+          <div>Producer <span id="xp-Producer" class="badge">0 XP</span></div>
+          <div class="progress"><div class="bar" data-avatar="Producer"></div></div>
+        </div>
+        <div class="kpi">
+          <div>Administrator <span id="xp-Administrator" class="badge">0 XP</span></div>
+          <div class="progress"><div class="bar" data-avatar="Administrator"></div></div>
+        </div>
+        <div class="kpi">
+          <div>Entrepreneur <span id="xp-Entrepreneur" class="badge">0 XP</span></div>
+          <div class="progress"><div class="bar" data-avatar="Entrepreneur"></div></div>
+        </div>
+        <div class="kpi">
+          <div>Integrator <span id="xp-Integrator" class="badge">0 XP</span></div>
+          <div class="progress"><div class="bar" data-avatar="Integrator"></div></div>
+        </div>
+      </div>
+      <p class="small" style="margin-top:10px">Complete tasks on the Tasks page to earn XP. Bars scale to 100% at 200 XP (demo).</p>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

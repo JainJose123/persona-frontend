@@ -1,0 +1,79 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>POS Demo • Martin (Home)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="setActive('nav-home')">
+  <nav>
+    <a id="nav-home" href="index.html">🏠 Home</a>
+    <a id="nav-tasks" href="tasks.html">🗓️ Tasks</a>
+    <a id="nav-xp" href="xp.html">⭐ XP</a>
+    <a id="nav-email" href="email.html">✉️ Email</a>
+    <span class="small" style="margin-left:auto">LLM: Hugging Face via Flask • <a href="#" onclick="promptBase()">set API</a></span>
+  </nav>
+  <div class="container">
+    <div class="row">
+      <div class="card">
+        <h2>Martin — Multi‑Persona AI</h2>
+        <p class="small">Ask anything. Choose a PAEI persona. Optionally add RPM (Result, Purpose, Actions) and get structured answers.</p>
+        <div class="row" style="grid-template-columns: 2fr 1fr;">
+          <div>
+            <label>Message</label>
+            <textarea id="msg" rows="6" placeholder="e.g., Plan my afternoon for deep work and 2 important emails."></textarea>
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <select id="persona">
+                <option>Producer</option>
+                <option>Administrator</option>
+                <option>Entrepreneur</option>
+                <option>Integrator</option>
+              </select>
+              <button onclick="useVoiceInput('msg')">🎙️ Voice</button>
+              <button onclick="send()">Ask Martin</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>RPM Context</h3>
+            <input id="rpm-result" placeholder="Result (what)">
+            <input id="rpm-purpose" placeholder="Purpose (why)" style="margin-top:8px">
+            <textarea id="rpm-actions" rows="4" placeholder="Actions (comma separated)"></textarea>
+          </div>
+        </div>
+        <div id="out" class="card" style="margin-top:14px;white-space:pre-wrap"></div>
+      </div>
+      <div class="card">
+        <h3>Daily Suggestions</h3>
+        <div class="kpis">
+          <div class="kpi"><div class="badge">Deep Work</div><div id="k1" style="margin-top:6px">Focus 90m</div></div>
+          <div class="kpi"><div class="badge">Admin</div><div id="k2" style="margin-top:6px">Inbox 20m</div></div>
+          <div class="kpi"><div class="badge">Well‑being</div><div id="k3" style="margin-top:6px">Walk 20m</div></div>
+          <div class="kpi"><div class="badge">Social</div><div id="k4" style="margin-top:6px">Call mom</div></div>
+        </div>
+        <div class="footer">PAEI + RPM ensure balanced advice. Voice supported via Web Speech API.</div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    function promptBase(){
+      const v = prompt("Backend API base:", localStorage.getItem("API_BASE")||"http://localhost:5001/api");
+      if(v){ localStorage.setItem("API_BASE", v); alert("Saved. Reload the page."); }
+    }
+    async function send(){
+      const msg = document.getElementById("msg").value.trim();
+      if(!msg) return;
+      const persona = document.getElementById("persona").value;
+      const rpm = {
+        result: document.getElementById("rpm-result").value.trim(),
+        purpose: document.getElementById("rpm-purpose").value.trim(),
+        actions: document.getElementById("rpm-actions").value.split(",").map(s=>s.trim()).filter(Boolean)
+      };
+      const {reply} = await askLLM(msg, persona, rpm);
+      document.getElementById("out").textContent = reply || "[No response]";
+    }
+  </script>
+</body>
+</html>

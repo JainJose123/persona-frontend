@@ -1,0 +1,78 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>POS Demo • Email Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="setActive('nav-email')">
+  <nav>
+    <a id="nav-home" href="index.html">🏠 Home</a>
+    <a id="nav-tasks" href="tasks.html">🗓️ Tasks</a>
+    <a id="nav-xp" href="xp.html">⭐ XP</a>
+    <a id="nav-email" href="email.html">✉️ Email</a>
+  </nav>
+  <div class="container">
+    <div class="row">
+      <div class="card">
+        <h2>Inbox (Demo)</h2>
+        <div id="inbox"></div>
+      </div>
+      <div class="card">
+        <h3>Draft Reply</h3>
+        <textarea id="thread" rows="10" class="transcript" placeholder="Select a mock email to load thread here."></textarea>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button onclick="loadSelected()">Load Selected</button>
+          <button onclick="compose()">Ask Martin to Draft</button>
+        </div>
+        <div id="draft" class="card" style="margin-top:12px;white-space:pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    const MOCK = [
+      {id:1, from:"Sarah", subject:"Project timeline", body:"Hey, can we move the deadline to Friday? Also need a quick call tomorrow."},
+      {id:2, from:"Electric Co.", subject:"Bill due 15 Nov", body:"Your bill of ₹2,350 is due on Nov 15. Pay online to avoid late fees."},
+      {id:3, from:"Recruiter", subject:"Interview schedule", body:"We'd love to schedule a 30-min chat this week. Share your availability."}
+    ];
+    let selectedId = null;
+
+    function renderInbox(){
+      const el = document.getElementById("inbox");
+      el.innerHTML = MOCK.map(m=>`
+        <div class="card" style="margin:10px 0;border-style:dashed">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div><strong>${m.subject}</strong></div>
+              <div class="small">From: ${m.from}</div>
+            </div>
+            <div>
+              <button onclick="selectThread(${m.id})">Open</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+    function selectThread(id){
+      selectedId = id;
+      const m = MOCK.find(x=>x.id===id);
+      document.getElementById("thread").value = `From: ${m.from}\nSubject: ${m.subject}\n\n${m.body}`;
+    }
+    function loadSelected(){
+      if(selectedId===null) return alert("Pick an email first.");
+      const m = MOCK.find(x=>x.id===selectedId);
+      document.getElementById("thread").value = `From: ${m.from}\nSubject: ${m.subject}\n\n${m.body}`;
+    }
+    async function compose(){
+      const thread = document.getElementById("thread").value.trim();
+      if(!thread) return alert("Paste or load a thread first.");
+      const {draft} = await draftEmail(thread);
+      document.getElementById("draft").textContent = draft || "[No draft]";
+    }
+    renderInbox();
+  </script>
+</body>
+</html>

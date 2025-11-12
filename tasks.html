@@ -1,0 +1,92 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>POS Demo • Tasks & Reminders</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="setActive('nav-tasks'); renderList();">
+  <nav>
+    <a id="nav-home" href="index.html">🏠 Home</a>
+    <a id="nav-tasks" href="tasks.html">🗓️ Tasks</a>
+    <a id="nav-xp" href="xp.html">⭐ XP</a>
+    <a id="nav-email" href="email.html">✉️ Email</a>
+    <span class="small" style="margin-left:auto">LLM-backed task helper</span>
+  </nav>
+  <div class="container">
+    <div class="row">
+      <div class="card">
+        <h2>Create Reminder</h2>
+        <div class="row">
+          <div>
+            <input id="t-title" placeholder="Task title (e.g., Call Sarah)">
+            <textarea id="t-purpose" rows="3" placeholder="Purpose (RPM: why)"></textarea>
+          </div>
+          <div>
+            <label>Due</label>
+            <input id="t-due" type="datetime-local">
+            <label style="margin-top:10px;display:block">Avatar</label>
+            <select id="t-avatar">
+              <option>Producer</option>
+              <option>Administrator</option>
+              <option>Entrepreneur</option>
+              <option>Integrator</option>
+            </select>
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <button onclick="useVoiceInput('t-title')">🎙️ Voice</button>
+              <button onclick="createTask()">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>My Tasks</h3>
+        <div id="list"></div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    document.getElementById("t-due").value = fmtDateTimeLocal(new Date(Date.now()+60*60*1000));
+    function createTask(){
+      const title = document.getElementById("t-title").value.trim();
+      if(!title) return alert("Enter a task title.");
+      addTask({
+        title,
+        purpose: document.getElementById("t-purpose").value.trim(),
+        due: document.getElementById("t-due").value,
+        avatar: document.getElementById("t-avatar").value
+      });
+      document.getElementById("t-title").value = "";
+      document.getElementById("t-purpose").value = "";
+      renderList();
+      alert("Task added. (Local demo)"); 
+    }
+    function renderList(){
+      const el = document.getElementById("list");
+      const tasks = getTasks();
+      if(!tasks.length){ el.innerHTML = "<p class='small'>No tasks yet.</p>"; return; }
+      el.innerHTML = tasks.map(t=>`
+        <div class="card" style="margin:10px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div><span class="badge">${t.avatar}</span> <strong>${t.title}</strong></div>
+              <div class="small">Purpose: ${t.purpose || "—"} • Due: ${t.due || "—"}</div>
+            </div>
+            <div>
+              ${t.done ? "<span class='badge'>Done</span>" : `<button onclick="doComplete(${t.id})">Mark Done (+10 XP)</button>`}
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+    function doComplete(id){
+      completeTask(id);
+      renderList();
+      alert("Task completed! XP awarded.");
+    }
+  </script>
+</body>
+</html>
