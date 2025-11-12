@@ -260,136 +260,138 @@
   </svg>
 
   <script>
-    const BASE = "https://persona-backend-4ru3.onrender.com";
-    const content = document.getElementById("contentArea");
+  const API_BASE = "https://persona-backend-4ru3.onrender.com/api";
 
-    async function show(view) {
-      if (view === "chat") content.innerHTML = `
-        <h1>Chat with Persona</h1>
-        <textarea id="chatInput" placeholder="Ask anything..."></textarea>
-        <button class="action" onclick="sendChat()">Send</button>
-        <div id="chatOutput" class="output">Waiting for message...</div>
-      `;
-      else if (view === "tasks") content.innerHTML = `
-        <h1>Task Planner</h1>
-        <textarea id="taskInput" placeholder="What do you want to plan?"></textarea>
-        <button class="action" onclick="makeTasks()">Generate</button>
-        <div id="taskOutput" class="output">Waiting...</div>
-      `;
-      else if (view === "xp") content.innerHTML = `
-        <h1>XP Tracker</h1>
-        <div class="xp-ring">
-          <svg class="xp-svg" viewBox="0 0 120 120">
-            <circle class="xp-bg" cx="60" cy="60" r="50"></circle>
-            <circle class="xp-progress" cx="60" cy="60" r="50"></circle>
-          </svg>
-          <div class="xp-text">
-            <div id="xpDisplay">0</div><small>XP</small>
-          </div>
+  const content = document.getElementById("contentArea");
+
+  async function show(view) {
+    if (view === "chat") content.innerHTML = `
+      <h1>Chat with Persona</h1>
+      <textarea id="chatInput" placeholder="Ask anything..."></textarea>
+      <button class="action" onclick="sendChat()">Send</button>
+      <div id="chatOutput" class="output">Waiting for message...</div>
+    `;
+    else if (view === "tasks") content.innerHTML = `
+      <h1>Task Planner</h1>
+      <textarea id="taskInput" placeholder="What do you want to plan?"></textarea>
+      <button class="action" onclick="makeTasks()">Generate</button>
+      <div id="taskOutput" class="output">Waiting...</div>
+    `;
+    else if (view === "xp") content.innerHTML = `
+      <h1>XP Tracker</h1>
+      <div class="xp-ring">
+        <svg class="xp-svg" viewBox="0 0 120 120">
+          <circle class="xp-bg" cx="60" cy="60" r="50"></circle>
+          <circle class="xp-progress" cx="60" cy="60" r="50"></circle>
+        </svg>
+        <div class="xp-text">
+          <div id="xpDisplay">0</div><small>XP</small>
         </div>
-        <input id="xpAction" placeholder="Action (chat, task, email)" />
-        <button class="action" onclick="addXP()">Add XP</button>
-      `;
-      else if (view === "email") content.innerHTML = `
-        <h1>Email Composer</h1>
-        <textarea id="emailInput" placeholder="Paste thread or draft..."></textarea>
-        <button class="action" onclick="composeEmail()">Generate Draft</button>
-        <div id="emailOutput" class="output">Waiting...</div>
-        <button class="gmail-btn" onclick="openGmail()">Open Gmail Compose</button>
-      `;
-      fetchHealth();
-    }
+      </div>
+      <input id="xpAction" placeholder="Action (chat, task, email)" />
+      <button class="action" onclick="addXP()">Add XP</button>
+    `;
+    else if (view === "email") content.innerHTML = `
+      <h1>Email Composer</h1>
+      <textarea id="emailInput" placeholder="Paste thread or draft..."></textarea>
+      <button class="action" onclick="composeEmail()">Generate Draft</button>
+      <div id="emailOutput" class="output">Waiting...</div>
+      <button class="gmail-btn" onclick="openGmail()">Open Gmail Compose</button>
+    `;
+    fetchHealth();
+  }
 
-    async function sendChat() {
-      const message = document.getElementById("chatInput").value;
-      const output = document.getElementById("chatOutput");
-      output.textContent = "Thinking...";
-      const res = await fetch(`${BASE}/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
-      const data = await res.json();
-      output.textContent = data.reply;
-      loadHistory();
-    }
-
-    async function makeTasks() {
-      const goal = document.getElementById("taskInput").value;
-      const out = document.getElementById("taskOutput");
-      out.textContent = "Planning...";
-      const res = await fetch(`${BASE}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal })
-      });
-      const data = await res.json();
-      out.textContent = data.tasks;
-      loadHistory();
-    }
-
-    async function composeEmail() {
-      const thread = document.getElementById("emailInput").value;
-      const output = document.getElementById("emailOutput");
-      output.textContent = "Composing...";
-      const res = await fetch(`${BASE}/draft-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thread })
-      });
-      const data = await res.json();
-      output.textContent = data.draft;
-      loadHistory();
-    }
-
-    function openGmail() {
-      window.open("https://mail.google.com/mail/u/0/#inbox?compose=new", "_blank");
-    }
-
-    async function addXP() {
-      const action = document.getElementById("xpAction").value || "chat";
-      const res = await fetch(`${BASE}/xp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action })
-      });
-      const data = await res.json();
-      animateXP(data.total_xp);
-    }
-
-    function animateXP(xp) {
-      const circle = document.querySelector('.xp-progress');
-      if (!circle) return;
-      const maxXP = 1000;
-      const offset = 314 - (xp / maxXP) * 314;
-      circle.style.strokeDashoffset = offset;
-      document.getElementById("xpDisplay").textContent = xp;
-    }
-
-    async function fetchHealth() {
-      const res = await fetch(`${BASE}/health`);
-      const data = await res.json();
-      animateXP(data.xp);
-    }
-
-    async function loadHistory() {
-      const res = await fetch(`${BASE}/history`);
-      const data = await res.json();
-
-      const chatDiv = document.getElementById("chatHistory");
-      chatDiv.innerHTML = data.chats.map(c =>
-        `<div class="history-item"><b>You:</b> ${c.user}<br><b>AI:</b> ${c.ai}</div>`
-      ).join("");
-
-      const taskDiv = document.getElementById("taskHistory");
-      taskDiv.innerHTML = data.tasks.map(t =>
-        `<div class="history-item"><b>Goal:</b> ${t.goal}<br>${t.items}</div>`
-      ).join("");
-    }
-
-    // Load defaults
-    show("chat");
+  async function sendChat() {
+    const message = document.getElementById("chatInput").value;
+    const output = document.getElementById("chatOutput");
+    output.textContent = "Thinking...";
+    const res = await fetch(`${API_BASE}/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+    const data = await res.json();
+    output.textContent = data.reply;
     loadHistory();
-  </script>
+  }
+
+  async function makeTasks() {
+    const goal = document.getElementById("taskInput").value;
+    const out = document.getElementById("taskOutput");
+    out.textContent = "Planning...";
+    const res = await fetch(`${API_BASE}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ goal })
+    });
+    const data = await res.json();
+    out.textContent = data.tasks;
+    loadHistory();
+  }
+
+  async function composeEmail() {
+    const thread = document.getElementById("emailInput").value;
+    const output = document.getElementById("emailOutput");
+    output.textContent = "Composing...";
+    const res = await fetch(`${API_BASE}/draft-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ thread })
+    });
+    const data = await res.json();
+    output.textContent = data.draft;
+    loadHistory();
+  }
+
+  function openGmail() {
+    window.open("https://mail.google.com/mail/u/0/#inbox?compose=new", "_blank");
+  }
+
+  async function addXP() {
+    const action = document.getElementById("xpAction").value || "chat";
+    const res = await fetch(`${API_BASE}/xp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action })
+    });
+    const data = await res.json();
+    animateXP(data.total_xp);
+  }
+
+  function animateXP(xp) {
+    const circle = document.querySelector('.xp-progress');
+    if (!circle) return;
+    const maxXP = 1000;
+    const offset = 314 - (xp / maxXP) * 314;
+    circle.style.strokeDashoffset = offset;
+    document.getElementById("xpDisplay").textContent = xp;
+  }
+
+  async function fetchHealth() {
+    const res = await fetch(`${API_BASE}/health`);
+    const data = await res.json();
+    animateXP(data.xp);
+  }
+
+  async function loadHistory() {
+    const res = await fetch(`${API_BASE}/history`);
+    const data = await res.json();
+
+    const chatDiv = document.getElementById("chatHistory");
+    chatDiv.innerHTML = data.chats.map(c =>
+      `<div class="history-item"><b>You:</b> ${c.user}<br><b>AI:</b> ${c.ai}</div>`
+    ).join("");
+
+    const taskDiv = document.getElementById("taskHistory");
+    taskDiv.innerHTML = data.tasks.map(t =>
+      `<div class="history-item"><b>Goal:</b> ${t.goal}<br>${t.items}</div>`
+    ).join("");
+  }
+
+  // Load defaults
+  show("chat");
+  loadHistory();
+</script>
+
 </body>
 </html>
